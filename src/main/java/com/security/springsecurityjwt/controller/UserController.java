@@ -1,5 +1,6 @@
 package com.security.springsecurityjwt.controller;
 
+import org.jboss.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +20,8 @@ import com.security.springsecurityjwt.util.JwtTokenUtil;
 @RestController
 public class UserController {
 
+	private static final Logger logger = Logger.getLogger(UserController.class);
+
 	@Autowired
 	AuthenticationManager authManager;
 	@Autowired
@@ -28,11 +31,22 @@ public class UserController {
 
 	@RequestMapping({ "/hello" })
 	public String hello() {
+		return "Hello World";
+	}
+	
+	@RequestMapping({ "/user" })
+	public String getUser() {
 		return "Hello User";
+	}
+	
+	@RequestMapping({ "/admin" })
+	public String getAdmin() {
+		return "Hello Admin";
 	}
 
 	@RequestMapping(value = "/authenticate", method = RequestMethod.POST)
 	public ResponseEntity<?> generateAuthToken(@RequestBody AuthenticationRequest request) throws Exception {
+		logger.info("UserController:: generateAuthToken() start");
 		try {
 			authManager.authenticate(
 					new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
@@ -41,6 +55,8 @@ public class UserController {
 		}
 		final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
 		String jwt = jwtTokenUtil.generateToken(userDetails);
+
+		logger.info("UserController:: generateAuthToken() end");
 
 		return ResponseEntity.ok(new AuthenticationResponse(jwt));
 	}
